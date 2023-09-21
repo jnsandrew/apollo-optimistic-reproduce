@@ -36,7 +36,10 @@ const ADD_PERSON = gql`
 
 function App() {
   const [name, setName] = useState("");
-  const { loading, data } = useQuery(ALL_PEOPLE);
+  const { loading, data } = useQuery(ALL_PEOPLE, {
+    fetchPolicy: 'network-only',
+    nextFetchPolicy: 'cache-first',
+  });
 
   const [addPerson] = useMutation(ADD_PERSON, {
     update: (cache, { data: { addPerson: addPersonData } }) => {
@@ -65,7 +68,16 @@ function App() {
         />
         <button
           onClick={() => {
-            addPerson({ variables: { name } });
+            addPerson({
+              variables: { name },
+              optimisticResponse: {
+                addPerson: {
+                  __typename: 'Person',
+                  id: '4',
+                  name,
+                },
+              },
+            });
             setName("");
           }}
         >
